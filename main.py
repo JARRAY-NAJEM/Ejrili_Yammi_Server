@@ -196,22 +196,23 @@ def update_user(email):
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=extras.RealDictCursor)
-        new_user = request.get_json()
-        email = new_user['email']
+        updated_user  = request.get_json()
+        #email = updated_user ['email']
         cur.execute(
             "UPDATE account_user SET firstname=%s,name=%s,username=%s,email=%s,phone=%s,password=%s,gradient=%s,relationship=%s,contact1=%s,contact2=%s,information=%s,medications=%s,allergies=%s WHERE id = %s RETURNING *",
-            (new_user['firstname'], new_user['name'], new_user['username'], new_user['email'], new_user['phone'], new_user['password'], new_user['gradient'], new_user['relationship'], new_user['contact1'], new_user['contact2'], new_user['information'], new_user['medications'], new_user['allergies'], id)
+            (updated_user ['firstname'], updated_user ['name'], updated_user ['username'], updated_user ['email'], updated_user ['phone'], updated_user ['password'], updated_user ['gradient'], updated_user ['relationship'], updated_user ['contact1'], updated_user ['contact2'], updated_user ['information'], updated_user ['medications'], updated_user ['allergies'], id)
         )
         updated_user = cur.fetchone()
         conn.commit()
-        if not updated_user:
-            raise HTTPNotFound(description='User not found')
-        return jsonify(updated_user), 200
-    except Exception as e:
-        raise HTTPInternalServerError(description=str(e))
-    finally:
+        
+        
         cur.close()
         conn.close()
+        if updated_user is None:
+            return jsonify({'message': 'User not found'}), 404
+        return jsonify(updated_user),200
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
 
 # delete user by id
 # @app.delete('/api/del/<from>')
