@@ -25,15 +25,15 @@ port = environ.get('DB_PORT')
 
 
 def get_db_connection():
-#     conn = connect(host='localhost',
-#                    database='postgres',
-#                    user='postgres',
-#                    password='password',
-#                    port=5432)
-#   #  conn.set_isolation_level(0)
-    DATABASE_URI = 'postgres://postgres_ejrili:bCHICAykURsRLPLI8evkHsWW7Js5ggQI@dpg-ch2kk9dgk4qarqhhjsh0-a.oregon-postgres.render.com/postgres_ejrili'
+    conn = connect(host='localhost',
+                   database='postgres',
+                   user='postgres',
+                   password='password',
+                   port=5432)
+  #  conn.set_isolation_level(0)
+#    DATABASE_URI = 'postgres://postgres_ejrili:bCHICAykURsRLPLI8evkHsWW7Js5ggQI@dpg-ch2kk9dgk4qarqhhjsh0-a.oregon-postgres.render.com/postgres_ejrili'
 
-    conn = psycopg2.connect(DATABASE_URI)
+    # conn = psycopg2.connect(DATABASE_URI)
 
     return conn
 @app.route('/chat', methods=['POST'])
@@ -148,6 +148,28 @@ def get_users():
         return jsonify({'message': str(e)}), 500
 
 
+
+@app.route('/api/getUser/<email>', methods=['GET'])
+def get_one_user(email):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=extras.RealDictCursor)
+        query = "SELECT * FROM account_user WHERE email = %s"
+        cur.execute(query, (email,))
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if not user:
+            return jsonify({'message': 'User not found'}), 404
+
+        return jsonify(user)
+
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
+
+
+
 # add user
 # @app.post('/api/post')
 # def create_user():
@@ -191,26 +213,23 @@ def get_user(email, password):
 
 
 # update user by id
-@app.route('/api/put/<email>', methods=['PUT'])
+@app.route('/api/put/<string:email>', methods=['PUT'])
 def update_user(email):
     try:
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=extras.RealDictCursor)
-        updated_user  = request.get_json()
-        #email = updated_user ['email']
+        cur = conn.cursor()
+        updated_user = request.get_json()
         cur.execute(
-            "UPDATE account_user SET firstname=%s,name=%s,username=%s,email=%s,phone=%s,password=%s,gradient=%s,relationship=%s,contact1=%s,contact2=%s,information=%s,medications=%s,allergies=%s WHERE id = %s RETURNING *",
-            (updated_user ['firstname'], updated_user ['name'], updated_user ['username'], updated_user ['email'], updated_user ['phone'], updated_user ['password'], updated_user ['gradient'], updated_user ['relationship'], updated_user ['contact1'], updated_user ['contact2'], updated_user ['information'], updated_user ['medications'], updated_user ['allergies'], id)
+            "UPDATE account_user SET firstname=%s,name=%s,username=%s,email=%s,phone=%s,password=%s,gradient=%s,relationship=%s,contact1=%s,contact2=%s,information=%s,medications=%s,allergies=%s WHERE email = %s RETURNING *",
+            (updated_user['firstname'], updated_user['name'], updated_user['username'], updated_user['email'], updated_user['phone'], updated_user['password'], updated_user['gradient'], updated_user['relationship'], updated_user['contact1'], updated_user['contact2'], updated_user['information'], updated_user['medications'], updated_user['allergies'], email)
         )
         updated_user = cur.fetchone()
         conn.commit()
-        
-        
         cur.close()
         conn.close()
         if updated_user is None:
             return jsonify({'message': 'User not found'}), 404
-        return jsonify(updated_user),200
+        return jsonify({'message': 'update success'}), 200
     except Exception as e:
         return jsonify({'message': str(e)}), 500
 
@@ -376,3 +395,5 @@ def home():
 
 # if __name__ == '__main__':
 #     app.run(debug=True,port=5000)
+
+
