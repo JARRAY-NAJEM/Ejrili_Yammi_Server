@@ -3,6 +3,11 @@
 CREATE TABLE IF NOT EXISTS account_user (
   id SERIAL PRIMARY KEY NOT NULL ,
   firstname VARCHAR(255) NOT NULL,
+
+Loading configuration....
+
+
+
   name VARCHAR(255) NOT NULL,
   username VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,

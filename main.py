@@ -191,37 +191,36 @@ def get_user(email, password):
 
 
 # update user by id
-@app.route('/api/put/<int:id>', methods=['PUT'])
-def update_user(id):
-    conn = get_db_connection()
-    cur = conn.cursor(cursor_factory=extras.RealDictCursor)
-    new_user = request.get_json()
-    firstname = new_user['firstname']
-    name = new_user['name']
-    username = new_user['username']
-    email = new_user['email']
-
-    # password = Fernet(key).encrypt(bytes(new_user['password'], 'utf-8'))
-    password = new_user['password']
-    phone = new_user['phone']
-    gradient = new_user['gradient']
-    relationship = new_user['relationship']
-    contact1 = new_user['contact1']
-    contact2 = new_user['contact2']
-    information = new_user['information']
-    medications = new_user['medications']
-    allergies = new_user['allergies']
-    cur.execute("UPDATE account_user SET firstname=%s,name=%s,username=%s,email=%s,phone=%s,password=%s,gradient=%s,relationship=%s,contact1=%s,contact2=%s,information=%s,medications=%s,allergies=%s WHERE id = %s RETURNING *",
-                (firstname, name, username, email, phone, password, gradient, relationship, contact1, contact2, information, medications, allergies, id))
-    updated_user = cur.fetchone()
-    conn.commit()
-    cur.close()
-    conn.close()
-    # print(updated_user)
-    # print(updated_user)
-    if updated_user is None:
-        return jsonify({'message': 'User not found'}), 404
-    return jsonify(updated_user)
+@app.route('/api/put/<email>', methods=['PUT'])
+def update_user(email):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=extras.RealDictCursor)
+        new_user = request.get_json()
+        firstname = new_user['firstname']
+        name = new_user['name']
+        username = new_user['username']
+        email = new_user['email']
+        password = new_user['password']
+        phone = new_user['phone']
+        gradient = new_user['gradient']
+        relationship = new_user['relationship']
+        contact1 = new_user['contact1']
+        contact2 = new_user['contact2']
+        information = new_user['information']
+        medications = new_user['medications']
+        allergies = new_user['allergies']
+        cur.execute("UPDATE account_user SET firstname=%s,name=%s,username=%s,email=%s,phone=%s,password=%s,gradient=%s,relationship=%s,contact1=%s,contact2=%s,information=%s,medications=%s,allergies=%s WHERE id = %s RETURNING *",
+                    (firstname, name, username, email, phone, password, gradient, relationship, contact1, contact2, information, medications, allergies, id))
+        updated_user = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+        if updated_user is None:
+            return jsonify({'message': 'User not found'}), 404
+        return jsonify(updated_user),200
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
 
 # delete user by id
 # @app.delete('/api/del/<from>')
