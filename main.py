@@ -22,8 +22,6 @@ password = environ.get('DB_PASSWORD')
 port = environ.get('DB_PORT')
 
 # Auth database postgresql
-
-
 def get_db_connection():
     # conn = connect(host='localhost',
     #                database='postgres',
@@ -32,13 +30,9 @@ def get_db_connection():
     #                port=5432)
   #  conn.set_isolation_level(0)
     DATABASE_URI = 'postgres://postgres_ejrili:bCHICAykURsRLPLI8evkHsWW7Js5ggQI@dpg-ch2kk9dgk4qarqhhjsh0-a.oregon-postgres.render.com/postgres_ejrili'
-
     conn = psycopg2.connect(DATABASE_URI)
-
     return conn
 @app.route('/chat', methods=['POST'])
-
-
 def send_from_user():
     try:
         message = request.json.get('message')
@@ -50,8 +44,6 @@ def send_from_user():
     
     except requests.exceptions.RequestException as e:
          return jsonify({"error": f"Failed to connect to Rasa server: {e}"})
-
-
 def send_to_rasa(message):
     rasa_url = 'http://localhost:5005/webhooks/rest/webhook'
     data = {'message': message}
@@ -64,8 +56,7 @@ def send_to_rasa(message):
             return {"error": "Failed to communicate with Rasa server."}
     except requests.exceptions.RequestException as e:
         return {"error": f"Failed to connect to Rasa server: {e}"}
-
-
+    
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.json
@@ -74,16 +65,11 @@ def login():
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=extras.RealDictCursor)
     cur.execute("SELECT * FROM account_user")
-
     users = cur.fetchall()
-
     for user in users:
         if user['email'] == email and user['password'] == password:
             return jsonify({'message': 'Login Successful. '}),  200
-
     return jsonify({'message': 'Email Not already exists in the database. '}), 400
-# add user
-
 
 @app.post('/api/postAccount')
 def create_user():
@@ -103,11 +89,9 @@ def create_user():
     information = new_user['information']
     medications = new_user['medications']
     allergies = new_user['allergies']
-
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=extras.RealDictCursor)
     try:
-
         cur.execute("INSERT INTO account_user (firstname,name,username,email,phone,password,gradient,relationship,contact1,contact2,information,medications,allergies) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING *",
                     (firstname, name, username, email, phone, password, gradient, relationship, contact1, contact2, information, medications, allergies))
         new_user = cur.fetchone()
@@ -121,12 +105,7 @@ def create_user():
     finally:
         cur.close()
         conn.close()
-    # print(new_user)
-
     return jsonify(response), status_code
-
-# get all users
-
 
 @app.route('/api/get', methods=['GET'])
 def get_users():
@@ -138,16 +117,11 @@ def get_users():
         users = cur.fetchall()
         cur.close()
         conn.close()
-
         if not users:
             return jsonify({'message': 'No users found'}), 404
-
         return jsonify(users)
-
     except Exception as e:
         return jsonify({'message': str(e)}), 500
-
-
 
 @app.route('/api/getUser/<email>', methods=['GET'])
 def get_one_user(email):
@@ -159,39 +133,12 @@ def get_one_user(email):
         user = cur.fetchone()
         cur.close()
         conn.close()
-
         if not user:
             return jsonify({'message': 'User not found'}), 404
-
         return jsonify(user)
-
     except Exception as e:
         return jsonify({'message': str(e)}), 500
 
-
-
-# add user
-# @app.post('/api/post')
-# def create_user():
-#    new_user = request.get_json()
-#    username = new_user['username']
-#    email = new_user['email']
-#    # password = Fernet(key).encrypt(bytes(new_user['password'], 'utf-8'))
-#    password = new_user['password']
-#
-#    conn = get_db_connection()
-#    cur = conn.cursor(cursor_factory=extras.RealDictCursor)
-#    cur.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s) RETURNING *",
-#                (username, email, password))
-#    new_user = cur.fetchone()
-#    conn.commit()
-#    cur.close()
-#    conn.close()
-#
-#    return jsonify(new_user)
-
-
-# get only user by Email and password
 @app.route('/api/get/<email>/<password>', methods=['GET'])
 def get_user(email, password):
     try:
@@ -202,17 +149,12 @@ def get_user(email, password):
         user = cur.fetchone()
         cur.close()
         conn.close()
-
         if user is None:
             return jsonify({'message': 'User not found'}), 404
-
         return jsonify(user), 200
-
     except Exception as e:
         return jsonify({'message': str(e)}), 500
 
-
-# update user by id
 @app.route('/api/put/<string:email>', methods=['PUT'])
 def update_user(email):
     try:
@@ -279,121 +221,3 @@ def home():
     conn.close()
 
     return jsonify('Ejrili Rasa Server Application')
-
-
-
-# if __name__ == '__main__':
-#     port = int(os.environ.get('PORT', 5000))
-#     app.run()
-#     # app.run()
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-# from flask import Flask, render_template, url_for, request, jsonify
-# import requests
-
-# app = Flask(__name__)
-# @app.route('/webhook', methods=['POST'])
-# def send_from_user():
-#     try:
-#         message = request.json.get('message')
-#         if not message:
-#             return jsonify({"error": "Invalid Input"})
-
-#         response = send_to_rasa(message)
-#         return jsonify(response)
-    
-#     except requests.exceptions.RequestException as e:
-#          return jsonify({"error": f"Failed to connect to Rasa server: {e}"})
-
-
-# def send_to_rasa(message):
-#     rasa_url = 'http://localhost:5005/webhooks/rest/webhook'
-#     data = {'message': message}
-#     try:
-#         response = requests.post(rasa_url, json=data)
-#         response.raise_for_status()
-#         if response.status_code == 200:
-#             return response.json()
-#         else:
-#             return {"error": "Failed to communicate with Rasa server."}
-#     except requests.exceptions.RequestException as e:
-#         return {"error": f"Failed to connect to Rasa server: {e}"}
-
-# if __name__ == "__main__":
-#     app.run(debug=True, port=3000)
-# from flask import Flask, render_template, url_for, request, jsonify
-# import requests
-
-# app = Flask(__name__)
-
-# # Define the route for incoming messages
-# @app.route('/chat', methods=['POST'])
-
-# def send_from_user():
-#     try:
-#         message = request.json.get('message')
-#         if not message:
-#             return jsonify({"error": "Invalid Input"})
-
-#         response = send_to_rasa(message)
-#         return jsonify(response)
-    
-#     except requests.exceptions.RequestException as e:
-#          return jsonify({"error": f"Failed to connect to Rasa server: {e}"})
-
-
-# def send_to_rasa(message):
-#     rasa_url = 'http://localhost:5005/webhooks/rest/webhook'
-#     data = {'message': message}
-#     try:
-#         response = requests.post(rasa_url, json=data)
-#         response.raise_for_status()
-#         if response.status_code == 200:
-#             return response.json()
-#         else:
-#             return {"error": "Failed to communicate with Rasa server."}
-#     except requests.exceptions.RequestException as e:
-#         return {"error": f"Failed to connect to Rasa server: {e}"}
-
-# if __name__ == '__main__':
-#     app.run(debug=True,port=5000)
-
-
