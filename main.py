@@ -25,15 +25,15 @@ port = environ.get('DB_PORT')
 
 
 def get_db_connection():
-    conn = connect(host='localhost',
-                   database='postgres',
-                   user='postgres',
-                   password='password',
-                   port=5432)
+    # conn = connect(host='localhost',
+    #                database='postgres',
+    #                user='postgres',
+    #                password='password',
+    #                port=5432)
   #  conn.set_isolation_level(0)
-#    DATABASE_URI = 'postgres://postgres_ejrili:bCHICAykURsRLPLI8evkHsWW7Js5ggQI@dpg-ch2kk9dgk4qarqhhjsh0-a.oregon-postgres.render.com/postgres_ejrili'
+    DATABASE_URI = 'postgres://postgres_ejrili:bCHICAykURsRLPLI8evkHsWW7Js5ggQI@dpg-ch2kk9dgk4qarqhhjsh0-a.oregon-postgres.render.com/postgres_ejrili'
 
-    # conn = psycopg2.connect(DATABASE_URI)
+    conn = psycopg2.connect(DATABASE_URI)
 
     return conn
 @app.route('/chat', methods=['POST'])
